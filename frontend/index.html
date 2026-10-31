@@ -1,0 +1,692 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VitalOps — One Hospital. One Operational Picture.</title>
+<link rel="preconnect" href="https://fonts.gstatic.com"><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FBEEE3;--bg2:#F6DCC9;--card:rgba(255,255,255,.66);--line:rgba(200,150,115,.28);--ink:#2E2119;--mut:#947B67;--ac:#F0834E;--ac2:#FFB183;--ok:#2FA97A;--wr:#E8A13A;--cr:#E4574C;--inf:#5B8DEF;--sh:0 18px 40px -20px rgba(180,110,70,.55)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Outfit,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(900px 600px at 82% 8%,var(--ac2),transparent 60%),radial-gradient(700px 500px at 8% 92%,#FFD9BE,transparent 60%),linear-gradient(160deg,var(--bg),var(--bg2));opacity:.85;z-index:-1}
+.mono{font-family:JetBrains Mono,monospace}
+.glass{background:var(--card);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;box-shadow:var(--sh)}
+button{font-family:inherit;cursor:pointer;border:0;color:inherit}
+.btn{background:linear-gradient(135deg,var(--ac),#FFA36B);color:#fff;padding:12px 22px;border-radius:99px;font-weight:700;letter-spacing:.3px;box-shadow:0 10px 24px -10px var(--ac);transition:.35s cubic-bezier(.2,.9,.3,1.4);position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 20px 34px -12px var(--ac)}
+.btn::after{content:"";position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);transition:.6s}
+.btn:hover::after{left:140%}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);padding:10px 18px;border-radius:99px;font-weight:600;transition:.3s}
+.ghost:hover{border-color:var(--ac);color:var(--ac);transform:translateY(-2px)}
+#login{min-height:100vh;display:grid;place-items:center;padding:24px}
+.lwrap{max-width:520px;width:100%;padding:44px;position:relative;overflow:hidden}
+h1.logo{font-size:clamp(34px,6vw,52px);font-weight:900;letter-spacing:-2px;line-height:.95}
+h1.logo span{background:linear-gradient(120deg,var(--ac),#FF6F91);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{color:var(--mut);margin:14px 0 26px;line-height:1.7;font-size:14px}
+.orb{position:absolute;border-radius:50%;background:linear-gradient(140deg,#fff,var(--ac2));filter:blur(1px);opacity:.6;animation:fl 9s ease-in-out infinite}
+@keyframes fl{0%,100%{transform:translateY(0)}50%{transform:translateY(-26px)}}
+.rowsel{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px}
+.rsel{padding:10px 6px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.4);text-align:center;font-size:12px;font-weight:700;transition:.3s}
+.rsel.on{background:linear-gradient(135deg,var(--ac),#FFA36B);color:#fff;border-color:transparent;transform:translateY(-3px)}
+.rsel:hover{transform:translateY(-3px)}
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--mut);font-weight:700;display:block;margin-bottom:6px;letter-spacing:.3px}
+input,select,textarea{font-family:inherit;padding:11px 16px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.6);color:var(--ink);outline:none;transition:.3s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 4px rgba(240,131,78,.16)}
+.grid2f{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.errbox{background:rgba(228,87,76,.12);color:var(--cr);padding:10px 14px;border-radius:12px;font-size:13px;margin-bottom:14px;display:none}
+.switchln{text-align:center;margin-top:16px;font-size:13px;color:var(--mut)}
+.switchln b{color:var(--ac);cursor:pointer}
+#app{display:none;grid-template-columns:250px 1fr;min-height:100vh}
+aside{padding:22px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{font-weight:900;font-size:22px;letter-spacing:-1px;padding:8px 12px 18px}
+.brand em{color:var(--ac);font-style:normal}
+.nav{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:14px;font-size:14px;font-weight:600;color:var(--mut);transition:.3s;background:none;width:100%;text-align:left}
+.nav:hover{background:rgba(255,255,255,.55);color:var(--ink);transform:translateX(6px)}
+.nav.on{background:linear-gradient(135deg,var(--ac),#FFA36B);color:#fff;box-shadow:0 12px 24px -12px var(--ac)}
+main{padding:22px 28px 60px;overflow:auto}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px;margin-bottom:22px;flex-wrap:wrap}
+.pill{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:700;letter-spacing:.4px}
+.p-ok{background:rgba(47,169,122,.15);color:var(--ok)}.p-wr{background:rgba(232,161,58,.16);color:var(--wr)}.p-cr{background:rgba(228,87,76,.16);color:var(--cr)}.p-inf{background:rgba(91,141,239,.14);color:var(--inf)}
+h2.ttl{font-size:30px;font-weight:900;letter-spacing:-1px;margin-bottom:4px}
+.sub{color:var(--mut);font-size:14px;margin-bottom:20px}
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}
+.card{padding:20px;transition:.45s cubic-bezier(.2,.9,.3,1.4)}
+.card:hover{transform:translateY(-8px);box-shadow:0 30px 50px -24px rgba(180,110,70,.7);border-color:var(--ac)}
+.kpi b{font-size:34px;font-weight:900;letter-spacing:-1.5px;display:block}
+.kpi small{color:var(--mut);font-size:12px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700}
+.bar{height:8px;border-radius:99px;background:rgba(160,120,95,.18);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--ac2),var(--ac));transition:width .9s cubic-bezier(.3,1.3,.4,1)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:1px;padding:10px 12px;border-bottom:1px solid var(--line)}
+td{padding:12px;border-bottom:1px solid var(--line)}
+tbody tr{transition:.25s}tbody tr:hover{background:rgba(255,255,255,.6)}
+.tw{overflow-x:auto}
+.chat{height:420px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:18px}
+.msg{max-width:78%;padding:13px 17px;border-radius:20px;font-size:14px;line-height:1.6;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.96)}}
+.me{align-self:flex-end;background:linear-gradient(135deg,var(--ac),#FFA36B);color:#fff;border-bottom-right-radius:6px}
+.bot{align-self:flex-start;background:rgba(255,255,255,.8);border:1px solid var(--line);border-bottom-left-radius:6px}
+.typing{display:flex;gap:5px}.typing i{width:7px;height:7px;border-radius:50%;background:var(--ac);animation:bl 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{50%{opacity:.25;transform:translateY(-4px)}}
+.tl{border-left:2px dashed var(--line);padding-left:22px;margin-left:8px}
+.tl div{position:relative;padding-bottom:20px}
+.tl div::before{content:"";position:absolute;left:-29px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--ac);box-shadow:0 0 0 4px var(--bg)}
+.fade{animation:fi .5s ease}@keyframes fi{from{opacity:0;transform:translateY(12px)}}
+.toast{position:fixed;bottom:28px;right:28px;padding:16px 22px;border-radius:18px;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;z-index:99;animation:pop .4s;max-width:340px}
+@media(max-width:900px){#app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;overflow-x:auto}.g4,.g3,.g2,.grid2f,.rowsel{grid-template-columns:1fr 1fr}main{padding:16px}}
+</style></head><body>
+
+<div id="login"><div class="lwrap glass">
+<div class="orb" style="width:100px;height:100px;top:-24px;left:20%"></div><div class="orb" style="width:150px;height:150px;bottom:-70px;right:6%;animation-delay:2s"></div>
+<div style="position:relative">
+<div style="display:inline-block;border:2px solid var(--ink);border-radius:99px;padding:7px 18px;font-weight:900;font-size:13px;letter-spacing:1px;margin-bottom:22px">VITAL<span style="font-weight:300">OPS</span></div>
+<h1 class="logo">Vital<span>Ops</span></h1>
+<p class="tag">One hospital. One operational picture. Smarter decisions.</p>
+<div class="errbox" id="errbox"></div>
+<div id="authForm"></div>
+<div class="switchln" id="switchln"></div>
+</div></div></div>
+
+<div id="app"><aside class="glass" style="border-radius:0 26px 26px 0"><div class="brand">Vital<em>Ops</em></div><div id="nav"></div>
+<div style="margin-top:auto;padding:12px;color:var(--mut);font-size:12px" id="whoami"></div>
+<button class="ghost" onclick="logout()">↩ Log out</button></aside>
+<main><header class="top glass" id="top"></header><div id="view"></div></main></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const ROLES=[["admin","Admin"],["doctor","Doctor"],["nurse","Nurse"],["staff","Staff"],["patient","Patient"]];
+let TOKEN=localStorage.getItem('vo_token')||null;
+let ME=JSON.parse(localStorage.getItem('vo_me')||'null');
+let MODE='login', SELROLE='patient';
+
+async function api(path,opts={}){
+  const headers={'Content-Type':'application/json',...(TOKEN?{Authorization:'Bearer '+TOKEN}:{}),...(opts.headers||{})};
+  const r=await fetch('/api'+path,{...opts,headers});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(data.error||'Request failed');
+  return data;
+}
+function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),3200)}
+function showErr(m){const e=$('#errbox');e.textContent=m;e.style.display='block'}
+function clearErr(){$('#errbox').style.display='none'}
+
+function extraFields(role){
+  if(role==='patient') return `<div class="grid2f"><div class="field"><label>Age</label><input id="f_age" type="number" placeholder="34"></div><div class="field"><label>Gender</label><select id="f_gender"><option>Female</option><option>Male</option><option>Other</option></select></div></div>
+  <div class="field"><label>Condition / reason for admission</label><input id="f_condition" placeholder="e.g. Cardiology, Pneumonia..."></div>
+  <label style="display:flex;gap:8px;align-items:center;margin:6px 0 14px;font-size:12.5px;color:var(--mut)"><input type="checkbox" id="f_isolation" style="width:auto">I require isolation precautions (known infectious condition)</label>`;
+  if(role==='doctor') return `<div class="field"><label>Specialty</label><select id="f_specialty"><option>General Medicine</option><option>Cardiology</option><option>Pulmonology</option><option>General Surgery</option><option>Pediatrics</option><option>Emergency</option></select></div>`;
+  if(role==='nurse'||role==='staff') return `<div class="field"><label>Department</label><input id="f_dept" placeholder="e.g. ICU, Ward B, Sanitation"></div>`;
+  if(role==='admin') return `<div class="field"><label>Admin code</label><input id="f_admincode" type="password" placeholder="Provided by hospital IT"></div>`;
+  return '';
+}
+function renderAuth(){
+  clearErr();
+  const isReg=MODE==='register';
+  $('#authForm').innerHTML=`
+  <div class="rowsel">${ROLES.map(r=>`<div class="rsel ${r[0]==SELROLE?'on':''}" onclick="selRole('${r[0]}')">${r[1]}</div>`).join('')}</div>
+  ${isReg?`<div class="field"><label>Full name</label><input id="f_name" placeholder="Your name"></div>`:''}
+  <div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@hospital.com"></div>
+  <div class="field"><label>Password</label><input id="f_password" type="password" placeholder="••••••••"></div>
+  ${isReg?extraFields(SELROLE):''}
+  <button class="btn" style="width:100%;margin-top:6px" onclick="submitAuth()">${isReg?'Create account':'Log in'}</button>`;
+  $('#switchln').innerHTML=isReg?`Already have an account? <b onclick="toggleMode()">Log in</b>`:`New here? <b onclick="toggleMode()">Create an account</b>`;
+}
+function selRole(r){SELROLE=r;renderAuth()}
+function toggleMode(){MODE=MODE==='login'?'register':'login';renderAuth()}
+async function submitAuth(){
+  clearErr();
+  const email=$('#f_email').value.trim(), password=$('#f_password').value;
+  if(!email||!password) return showErr('Email and password are required');
+  try{
+    let data;
+    if(MODE==='register'){
+      const name=$('#f_name').value.trim();
+      if(!name) return showErr('Name is required');
+      const body={name,email,password,role:SELROLE};
+      if(SELROLE==='patient'){body.age=$('#f_age').value;body.gender=$('#f_gender').value;body.condition=$('#f_condition').value;body.isolationPrecaution=$('#f_isolation').checked}
+      if(SELROLE==='doctor'){body.specialty=$('#f_specialty').value}
+      if(SELROLE==='nurse'||SELROLE==='staff'){body.dept=$('#f_dept').value}
+      if(SELROLE==='admin'){body.adminCode=$('#f_admincode').value}
+      data=await api('/auth/register',{method:'POST',body:JSON.stringify(body)});
+      toast('Account created — welcome to VitalOps');
+    } else {
+      data=await api('/auth/login',{method:'POST',body:JSON.stringify({email,password})});
+    }
+    TOKEN=data.token;ME={user:data.user,profile:data.profile};
+    localStorage.setItem('vo_token',TOKEN);localStorage.setItem('vo_me',JSON.stringify(ME));
+    enterApp();
+  }catch(e){showErr(e.message)}
+}
+function logout(){TOKEN=null;ME=null;localStorage.removeItem('vo_token');localStorage.removeItem('vo_me');$('#app').style.display='none';$('#login').style.display='grid';MODE='login';renderAuth()}
+
+const NAV={
+ admin:[["ov","◉","Overview"],["pat","☰","Patients"],["or","⧗","OR Scheduling"],["res","▦","Staff & Resources"],["inv","◫","Inventory"],["clean","✧","Sanitation"],["maint","🔧","Maintenance"],["sim","⚡","Simulation"],["rec","◆","Recommendations"],["aud","≡","Audit Log"]],
+ doctor:[["dsh","◉","Dashboard"],["dpat","☰","My Patients"],["dreq","🔔","Chat Requests"],["dapt","🗓","Appointments"],["or","⧗","OR Schedule"],["tasks","☑","Care Tasks"]],
+ nurse:[["dsh","◉","Dashboard"],["tasks","☑","Care Tasks"],["clean","✧","Sanitation"],["handoff","📝","Shift Handoff"],["maint","🔧","Maintenance"]],
+ staff:[["clean","✧","Sanitation"],["inv","◫","Inventory"],["maint","🔧","Maintenance"]],
+ patient:[["pdash","◉","My Care"],["chat","✦","AI Assistant"],["appt","🗓","Book Appointment"],["ptl","⧖","Timeline"]]
+};
+let view=null;
+function go(v){view=v;render()}
+
+async function enterApp(){
+  $('#login').style.display='none';$('#app').style.display='grid';
+  view=NAV[ME.user.role][0][0];
+  $('#whoami').innerHTML=`<b style="color:var(--ink)">${ME.user.name}</b><br>${ME.user.role.toUpperCase()}`;
+  render();
+}
+function renderNav(){
+  $('#nav').innerHTML=NAV[ME.user.role].map(n=>`<button class="nav ${n[0]==view?'on':''}" onclick="go('${n[0]}')"><span>${n[1]}</span>${n[2]}</button>`).join('');
+}
+async function renderTop(){
+  const role=ME.user.role;
+  $('#top').innerHTML=`<div><b style="font-size:16px">Meridian General Hospital</b><div style="color:var(--mut);font-size:12px">VitalOps live command layer</div></div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:relative">
+  <div style="position:relative"><input id="gsearch" placeholder="Search patients, rooms, items…" style="width:230px" oninput="doSearch(this.value)"><div id="sres" class="glass" style="display:none;position:absolute;top:46px;left:0;width:320px;max-height:320px;overflow-y:auto;z-index:50;padding:6px"></div></div>
+  ${role==='doctor'?`<div style="position:relative"><button class="ghost" style="position:relative;padding:10px 14px" onclick="toggleBell()">🔔<span id="bellcount" style="display:none;position:absolute;top:-6px;right:-6px;background:var(--cr);color:#fff;font-size:10px;font-weight:800;width:18px;height:18px;border-radius:50%;place-items:center"></span></button><div id="bellpanel" class="glass" style="display:none;position:absolute;top:50px;right:0;width:300px;max-height:360px;overflow-y:auto;z-index:60;padding:4px"></div></div>`:''}
+  <span class="pill p-inf">${role.toUpperCase()}</span></div>`;
+  document.addEventListener('click',e=>{
+    if(!e.target.closest('#gsearch')&&!e.target.closest('#sres')){const d=$('#sres');if(d)d.style.display='none'}
+    if(!e.target.closest('#bellpanel')&&!e.target.closest("button[onclick='toggleBell()']")){const b=$('#bellpanel');if(b)b.style.display='none'}
+  },{once:true});
+  if(role==='doctor') refreshBellCount();
+}
+let SDEBOUNCE=null;
+function doSearch(q){
+  clearTimeout(SDEBOUNCE);
+  SDEBOUNCE=setTimeout(async()=>{
+    const box=$('#sres');if(!box)return;
+    if(!q.trim()){box.style.display='none';return}
+    try{
+      const res=await api('/search?q='+encodeURIComponent(q));
+      window._sres=res;
+      box.innerHTML=res.length?res.map((r,i)=>`<div onclick="pickSearch(${i})" style="padding:10px 12px;border-radius:12px;cursor:pointer;display:flex;justify-content:space-between;gap:10px" onmouseover="this.style.background='rgba(255,255,255,.6)'" onmouseout="this.style.background='transparent'"><span><b style="font-size:13.5px">${r.label}</b><div style="color:var(--mut);font-size:11.5px">${r.sub}</div></span><span class="pill p-inf" style="font-size:10px">${r.tag}</span></div>`).join(''):`<div style="padding:14px;color:var(--mut);font-size:13px">No matches</div>`;
+      box.style.display='block';
+    }catch(e){}
+  },250);
+}
+function pickSearch(i){
+  const r=window._sres[i];$('#sres').style.display='none';$('#gsearch').value='';
+  if(r.type==='patient') go('pat'); else if(r.type==='inventory') go('inv'); else if(r.type==='room') go('clean'); else go(view);
+  toast('Found: '+r.label);
+}
+async function toggleBell(){
+  const p=$('#bellpanel');if(!p)return;
+  p.style.display=p.style.display==='block'?'none':'block';
+  if(p.style.display==='block'){
+    const reqs=await api('/requests');
+    p.innerHTML=reqs.length?reqs.map(r=>`<div style="padding:12px;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between;align-items:center"><b>${r.patientName}</b><span class="pill ${r.status==='PENDING'?'p-wr':r.status==='ACCEPTED'?'p-ok':'p-cr'}">${r.status}</span></div><div style="color:var(--mut);font-size:12px;margin:6px 0">${r.reason}</div>${r.status==='PENDING'?`<div style="display:flex;gap:8px;margin-top:8px"><button class="btn" style="padding:6px 12px;font-size:12px" onclick="respondReq('${r.id}','ACCEPTED')">Accept</button><button class="ghost" style="padding:6px 12px;font-size:12px" onclick="respondReq('${r.id}','REJECTED')">Reject</button></div>`:''}</div>`).join(''):`<div style="padding:16px;color:var(--mut);font-size:13px">No requests yet</div>`;
+  }
+}
+async function refreshBellCount(){
+  try{const reqs=await api('/requests');const n=reqs.filter(r=>r.status==='PENDING').length;const b=$('#bellcount');if(b){b.style.display=n?'grid':'none';b.textContent=n}}catch(e){}
+}
+async function respondReq(id,status){
+  await api('/requests/'+id,{method:'PATCH',body:JSON.stringify({status})});
+  toast(status==='ACCEPTED'?'Request accepted':'Request rejected');
+  toggleBell();toggleBell();refreshBellCount();
+  if(view==='dreq')render();
+}
+
+const H=(t,s)=>`<h2 class="ttl">${t}</h2><div class="sub">${s}</div>`;
+const KPI=(l,v,e="")=>`<div class="glass card kpi"><small>${l}</small><b>${v}</b><div style="color:var(--mut);font-size:12px">${e}</div></div>`;
+const PB=(l,v)=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600"><span>${l}</span><span class="mono">${v}%</span></div><div class="bar"><i style="width:${v}%;${v>85?'background:linear-gradient(90deg,#FF9A6C,var(--cr))':''}"></i></div></div>`;
+function rk(r){return r=='CRITICAL'||r=='STOCKOUT'?'p-cr':r=='HIGH'||r=='WARNING'||r=='WATCH'||r=='ACTIVE'||r=='OCCUPIED'||r=='ASSIGNED'||r=='IN_PROGRESS'?'p-wr':r=='MEDIUM'||r=='PENDING'||r=='QC_REVIEW'||r=='OPEN'?'p-inf':'p-ok'}
+
+async function render(){
+  renderNav();await renderTop();
+  const el=$('#view');el.innerHTML='<div class="sub">Loading…</div>';
+  try{
+    el.innerHTML=await VIEWS[view]();
+    el.className='fade';
+  }catch(e){el.innerHTML=`<div class="glass card" style="color:var(--cr)">Error: ${e.message}</div>`}
+}
+
+const VIEWS={
+ov: async()=>{
+  const [report, rooms, inv] = await Promise.all([api('/simulation/report'), api('/rooms'), api('/inventory')]);
+  const stockRisk=inv.filter(i=>i.risk==='STOCKOUT').length;
+  const st=report.hospitalState.icuPressure>90?['p-cr','CRITICAL']:report.hospitalState.icuPressure>78?['p-wr','ELEVATED']:['p-ok','NORMAL'];
+  return H('Hospital Command Center','Live operational picture — built entirely from real registered data')+
+  `<div class="grid g4">${KPI('Beds Available',report.bedsAvailable,'of '+report.bedsTotal+' total')}${KPI('Active Patients',report.totalPatients,report.riskCounts.CRITICAL+' critical')}${KPI('Doctors on roster',report.totalDoctors,report.totalStaff+' support staff')}${KPI('Rooms in Sanitation',report.roomsInSanitation,'auto-cycling')}</div>
+  <div class="grid g2" style="margin-top:16px"><div class="glass card"><small class="mono" style="color:var(--mut)">SITUATION AWARENESS</small><h3 style="margin:6px 0 16px">Pressure Index <span class="pill ${st[0]}" style="margin-left:8px">${st[1]}</span></h3>
+  ${PB('ICU Pressure',report.hospitalState.icuPressure)}${PB('Staff Pressure',report.hospitalState.staffPressure)}${PB('OR Pressure',report.hospitalState.orPressure)}${PB('Inventory Pressure',report.hospitalState.invPressure)}</div>
+  <div class="glass card"><small class="mono" style="color:var(--mut)">RISK DISTRIBUTION</small><div style="margin-top:14px">${Object.entries(report.riskCounts).map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span class="pill ${rk(k)}">${k}</span><b>${v} patient${v==1?'':'s'}</b></div>`).join('')}</div>
+  <div style="margin-top:14px;color:var(--mut);font-size:13px">Stockout risk items: <b style="color:var(--cr)">${stockRisk}</b> · Report generated ${report.generatedAt}</div></div></div>`;
+},
+
+pat: async()=>{
+  const patients=await api('/patients');
+  const addBtn=ME.user.role==='admin'?`<button class="btn" onclick="toggleAddPatient()">+ Add Patient</button>`:'';
+  return H('Patients','All active, registered patients — auto-assigned doctor & bed on sign-up')+
+  `<div style="margin-bottom:14px">${addBtn}</div><div id="addPatientPanel"></div>
+  <div class="glass card tw"><table><tr><th>ID</th><th>Patient</th><th>Age</th><th>Condition</th><th>Doctor</th><th>Bed</th><th>HR</th><th>SpO₂</th><th>Risk</th><th>Isolation</th><th></th></tr>
+  ${patients.length?patients.map(p=>`<tr><td class="mono">${p.id}</td><td><b>${p.name}</b></td><td>${p.age}</td><td>${p.condition}</td><td>${p.doctorName}</td><td class="mono">${p.bedId||'—'}</td><td class="mono">${p.vitals.hr}</td><td class="mono">${p.vitals.spo2}%</td><td><span class="pill ${rk(p.riskLevel)}">${p.riskLevel}</span></td><td>${p.isolationPrecaution?'<span class="pill p-cr">ISOLATION</span>':'<span style="color:var(--mut);font-size:12px">—</span>'}</td><td style="display:flex;gap:6px;flex-wrap:wrap">${ME.user.role!=='nurse'?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="doDischarge('${p.id}')">Discharge</button>`:`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="openVitals('${p.id}')">Update vitals</button>`}${['doctor','nurse','admin'].includes(ME.user.role)?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="toggleIsolation('${p.id}',${!!p.isolationPrecaution})">${p.isolationPrecaution?'Clear isolation':'Flag isolation'}</button>`:''}</td></tr>`).join(''):`<tr><td colspan="11" style="color:var(--mut)">No patients registered yet.</td></tr>`}</table></div>
+  <div id="vitalsPanel"></div>`;
+},
+
+res: async()=>{
+  const [doctors,staff,bedsData]=await Promise.all([api('/doctors'),api('/staff'),api('/beds')]);
+  return H('Staff & Resources','Everyone currently registered in VitalOps, plus bed capacity')+
+  `<div class="grid g2"><div class="glass card"><h3>Doctors (${doctors.length})</h3>${doctors.length?doctors.map(d=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span><b>${d.name}</b><div style="color:var(--mut);font-size:12px">${d.specialty}</div></span><span class="pill p-inf">${d.patientIds.length} patients</span></div>`).join(''):`<div style="color:var(--mut)">No doctors registered yet.</div>`}</div>
+  <div class="glass card"><h3>Nurses & Staff (${staff.length})</h3>${staff.length?staff.map(s=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span><b>${s.name}</b><div style="color:var(--mut);font-size:12px">${s.dept}</div></span><span class="pill p-inf">${s.role}</span></div>`).join(''):`<div style="color:var(--mut)">No staff registered yet.</div>`}</div></div>
+
+  <div class="glass card" style="margin-top:16px"><h3>Bed Capacity — Add / Remove</h3><p style="color:var(--mut);font-size:13px;margin:8px 0 4px">Increase or reduce bed count per ward. A bed can only be removed while it's free (not occupied or mid-sanitation).</p>
+  <div class="grid g3" style="margin-top:12px">${bedsData.summary.map(w=>`<div class="glass card" style="padding:14px"><b>${w.ward}</b><div style="color:var(--mut);font-size:12px;margin:6px 0">${w.available} available of ${w.total}</div></div>`).join('')}</div>
+  <div class="grid g3" style="margin-top:16px"><input id="bed_ward" placeholder="Ward name (e.g. ICU)"><input id="bed_count" type="number" min="1" placeholder="Beds to add" value="1"><button class="btn" onclick="addBeds()">+ Add beds</button></div>
+  <div class="tw" style="margin-top:16px"><table><tr><th>Bed ID</th><th>Ward</th><th>Status</th><th></th></tr>
+  ${bedsData.beds.map(b=>`<tr><td class="mono">${b.id}</td><td>${b.ward}</td><td><span class="pill ${rk(b.status==='available'?'OK':b.status==='occupied'?'OCCUPIED':'PENDING')}">${b.status}</span></td><td>${b.status==='available'?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="removeBed('${b.id}')">Remove</button>`:''}</td></tr>`).join('')}</table></div></div>`;
+},
+
+inv: async()=>{
+  const inv=await api('/inventory');
+  return H('Inventory Intelligence','Live consumption forecasting')+
+  `<div style="margin-bottom:14px"><button class="btn" onclick="toggleAddInventory()">+ Add item</button></div><div id="addInvPanel"></div>
+  <div class="glass card tw"><table><tr><th>Item</th><th>Stock</th><th>Daily use</th><th>Forecast</th><th>Lead time</th><th>Criticality</th><th>Risk</th><th></th></tr>
+  ${inv.map(i=>`<tr><td><b>${i.name}</b></td><td class="mono">${i.stock}</td><td class="mono">${i.dailyUsage}</td><td class="mono">${i.forecastDays} d</td><td class="mono">${i.leadTimeDays} d</td><td>${i.criticality}</td><td><span class="pill ${rk(i.risk)}">${i.risk}</span></td><td><button class="ghost" style="font-size:12px;padding:6px 12px" onclick="removeInventoryItem('${i.id}','${String(i.name).replace(/'/g,"\\'")}')">Remove</button></td></tr>`).join('')}</table></div>`;
+},
+
+clean: async()=>{
+  const rooms=await api('/rooms');
+  const isStaff=ME.user.role==='staff';
+  const canFlag=['doctor','nurse','admin'].includes(ME.user.role);
+  let reportHtml='';
+  if(ME.user.role==='admin'){
+    try{
+      const rep=await api('/rooms/reports/summary');
+      reportHtml=`<div class="glass card" style="margin-top:20px"><h3>Sanitation Performance</h3>
+      <div class="grid g4" style="margin-top:12px">${KPI('Cycles completed',rep.completedCycles)}${KPI('Avg. cycle time',rep.avgMinutes+' min')}${KPI('Deep cleans',rep.deepCleans)}${KPI('Active crew',rep.byStaff.length)}</div>
+      ${rep.byStaff.length?`<div class="tw" style="margin-top:14px"><table><tr><th>Staff</th><th>Cycles</th><th>Total minutes</th></tr>${rep.byStaff.map(s=>`<tr><td><b>${s.staffName}</b></td><td class="mono">${s.cycles}</td><td class="mono">${s.totalMinutes}</td></tr>`).join('')}</table></div>`:''}</div>`;
+    }catch(e){}
+  }
+  const cards=rooms.map(r=>{
+    const mine=r.assignedStaffId===ME.user.profileId;
+    const pct=(r.checklist&&r.checklist.length)?Math.round(r.checklist.filter(c=>c.done).length/r.checklist.length*100):0;
+    let actions='';
+    if(isStaff){
+      if(r.status==='PENDING'){
+        actions='<button class="btn" style="width:100%;margin-top:10px" onclick="claimRoom(\''+r.id+'\')">Claim room</button>';
+      } else if((r.status==='ASSIGNED'||r.status==='IN_PROGRESS')&&mine){
+        const items=(r.checklist||[]).map(c=>'<label style="display:flex;gap:8px;align-items:center;font-size:12.5px;padding:5px 0"><input type="checkbox" style="width:auto" '+(c.done?'checked':'')+' onchange="toggleChecklist(\''+r.id+'\',\''+c.id+'\',this.checked)">'+c.label+'</label>').join('');
+        actions=items+'<button class="ghost" style="width:100%;margin-top:10px" onclick="advanceRoom(\''+r.id+'\')">Send for quality check</button>';
+      } else if(r.status==='QC_REVIEW'&&mine){
+        actions='<div style="color:var(--mut);font-size:12px;margin:8px 0">All tasks logged — confirm and release the room.</div><button class="btn" style="width:100%" onclick="advanceRoom(\''+r.id+'\')">Confirm & release room</button>';
+      } else if(['ASSIGNED','IN_PROGRESS','QC_REVIEW'].includes(r.status)&&!mine){
+        actions='<div style="color:var(--mut);font-size:12px;margin-top:8px">Assigned to '+(r.assignedStaffName||'another staff member')+'</div>';
+      }
+    } else if(canFlag&&['PENDING','ASSIGNED'].includes(r.status)&&r.cycleType!=='DEEP'){
+      actions='<button class="ghost" style="width:100%;margin-top:10px;font-size:12px" onclick="flagDeepClean(\''+r.id+'\')">⚠ Flag for deep clean</button>';
+    }
+    const cycleTag=r.cycleType?(' · <b style="color:'+(r.cycleType==='DEEP'?'var(--cr)':'var(--mut)')+'">'+r.cycleType+' clean</b>'):'';
+    const assignedRow=r.assignedStaffName?('<div style="font-size:12px;color:var(--mut)">Assigned: <b style="color:var(--ink)">'+r.assignedStaffName+'</b></div>'):'';
+    const progressRow=(r.checklist&&r.checklist.length)?('<div class="bar" style="margin-top:8px"><i style="width:'+pct+'%"></i></div><div style="font-size:11px;color:var(--mut);margin-top:4px">'+pct+'% checklist complete</div>'):'';
+    return '<div class="glass card"><div style="display:flex;justify-content:space-between;align-items:center"><b class="mono" style="font-size:16px">'+r.id+'</b><span class="pill '+rk(r.status)+'">'+r.status.replace('_',' ')+'</span></div><div style="color:var(--mut);font-size:12px;margin:8px 0">'+r.ward+cycleTag+'</div>'+assignedRow+progressRow+actions+'</div>';
+  }).join('');
+  return H('Sanitation & Bed Turnover', isStaff?'Claim a room, work the checklist, then advance it through the cycle':'Live sanitation status — PENDING → ASSIGNED → IN PROGRESS → QC REVIEW → READY. Only sanitation staff can act on a room.')+
+  `<div class="grid g3">${cards}</div>${reportHtml}`;
+},
+
+tasks: async()=>{
+  const canCreate=['doctor','nurse'].includes(ME.user.role);
+  const tasksList=await api('/tasks');
+  let patientList=[];
+  if(canCreate){
+    if(ME.user.role==='doctor'){const me=await api('/doctors/me');patientList=me.patients;}
+    else {patientList=await api('/patients');}
+  }
+  const patientOptions=patientList.length?patientList.map(p=>`<option value="${p.id}">${p.name}</option>`).join(''):'<option value="">No patients available</option>';
+  const open=tasksList.filter(t=>t.status!=='DONE');
+  const done=tasksList.filter(t=>t.status==='DONE');
+  return H('Care Tasks','Short-cycle nursing to-dos tied to a patient — meds, observations, follow-ups')+
+  (canCreate?`<div class="glass card" style="margin-bottom:16px"><h3>New task</h3>
+  <div class="grid g3" style="margin-top:12px"><select id="ct_patient">${patientOptions}</select><input id="ct_task" placeholder="e.g. 08:00 medication round"><select id="ct_priority"><option>LOW</option><option selected>MEDIUM</option><option>HIGH</option></select></div>
+  <button class="btn" style="margin-top:12px" onclick="addCareTask()">+ Add task</button></div>`:'')+
+  `<div class="grid g2"><div class="glass card"><h3>Open (${open.length})</h3>${open.length?open.map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)"><span><b>${t.task}</b><div style="color:var(--mut);font-size:12px">${t.patientName} · ${t.priority}</div></span>${canCreate?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="completeCareTask('${t.id}')">Mark done</button>`:''}</div>`).join(''):`<div style="color:var(--mut)">Nothing open.</div>`}</div>
+  <div class="glass card"><h3>Completed (${done.length})</h3>${done.length?done.map(t=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${t.task}</b><div style="color:var(--mut);font-size:12px">${t.patientName} · done by ${t.completedBy}</div></div>`).join(''):`<div style="color:var(--mut)">No completed tasks yet.</div>`}</div></div>`;
+},
+
+handoff: async()=>{
+  const notes=await api('/tasks/handoff/notes');
+  return H('Shift Handoff Notes','Leave notes for the next shift — visible to nurses, doctors and admin')+
+  `<div class="glass card" style="margin-bottom:16px"><h3>New note</h3>
+  <div class="grid g2" style="margin-top:12px"><input id="hn_ward" placeholder="Ward (e.g. ICU)"><input id="hn_note" placeholder="What should the next shift know?"></div>
+  <button class="btn" style="margin-top:12px" onclick="addHandoffNote()">+ Add note</button></div>
+  <div class="glass card">${notes.length?notes.map(n=>`<div style="padding:12px 0;border-bottom:1px solid var(--line)"><div style="display:flex;justify-content:space-between"><b>${n.ward}</b><span class="mono" style="color:var(--mut);font-size:11px">${n.time}</span></div><div style="margin-top:6px">${n.note}</div><div style="color:var(--mut);font-size:11px;margin-top:4px">— ${n.author}</div></div>`).join(''):`<div style="color:var(--mut)">No handoff notes yet.</div>`}</div>`;
+},
+
+maint: async()=>{
+  const list=await api('/maintenance');
+  const isStaff=ME.user.role==='staff';
+  return H('Maintenance Requests','Facility issues logged by any role — resolved by sanitation/facilities staff')+
+  `<div class="glass card" style="margin-bottom:16px"><h3>Report an issue</h3>
+  <div class="grid g3" style="margin-top:12px"><input id="mt_ward" placeholder="Ward"><input id="mt_room" placeholder="Room/Bed ID (optional)"><select id="mt_priority"><option>LOW</option><option selected>MEDIUM</option><option>HIGH</option></select></div>
+  <div class="field" style="margin-top:12px"><input id="mt_issue" placeholder="Describe the issue"></div>
+  <button class="btn" onclick="reportMaintenance()">+ Report issue</button></div>
+  <div class="glass card tw"><table><tr><th>Issue</th><th>Ward/Room</th><th>Priority</th><th>Status</th><th>Reported by</th><th></th></tr>
+  ${list.length?list.map(m=>`<tr><td>${m.issue}</td><td class="mono">${m.ward}${m.roomId?' / '+m.roomId:''}</td><td>${m.priority}</td><td><span class="pill ${rk(m.status)}">${m.status}</span></td><td>${m.reportedBy}</td><td>${isStaff&&m.status!=='RESOLVED'?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="resolveMaintenance('${m.id}','${m.status==='OPEN'?'IN_PROGRESS':'RESOLVED'}')">${m.status==='OPEN'?'Start work':'Mark resolved'}</button>`:''}</td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--mut)">No maintenance requests yet.</td></tr>`}</table></div>`;
+},
+
+sim: async()=>{
+  const scenarios=await api('/simulation/scenarios');
+  return H('Simulation Center','Every scenario mutates the real hospital state')+
+  `<div class="grid g3">${scenarios.map(s=>`<button class="glass card" style="text-align:left" onclick="runSim('${s.name}')"><b style="font-size:16px">${s.name}</b><div style="color:var(--mut);font-size:12.5px;margin-top:8px;line-height:1.6">${s.description}</div><div class="pill p-inf" style="margin-top:12px;display:inline-block">Run scenario →</div></button>`).join('')}</div>
+  <div id="simout" style="margin-top:18px"></div>`;
+},
+
+or: async()=>{
+  const isDoctor=ME.user.role==='doctor';
+  const [patientsRaw, orRooms, schedule]=await Promise.all([
+    api(isDoctor?'/doctors/me':'/patients'),
+    api('/or-schedule/rooms'),
+    api('/or-schedule')
+  ]);
+  const patients=isDoctor?patientsRaw.patients:patientsRaw;
+  const ORROOMS=['OR-01','OR-02','OR-03','OR-04','OR-05'];
+  const order={CRITICAL:0,HIGH:1,MEDIUM:2,STABLE:3};
+  const queue=[...patients].filter(p=>order[p.riskLevel]<=1).sort((a,b)=>order[a.riskLevel]-order[b.riskLevel]);
+  const assigned=queue.map((p,i)=>({...p, or:ORROOMS[i%ORROOMS.length], duration: p.riskLevel==='CRITICAL'?'Emergency · ASAP':'Priority slot · within 2h'}));
+
+  const upcoming=[...schedule].filter(s=>s.status==='SCHEDULED').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const patientOptions=patients.length?patients.map(p=>`<option value="${p.id}">${p.name}</option>`).join(''):'<option value="">No patients available</option>';
+  const roomOptions=orRooms.map(r=>`<option>${r}</option>`).join('');
+
+  return H('OR Scheduling','Automatically prioritized by current patient risk level — CRITICAL and HIGH first')+
+  `<div class="grid g3">${assigned.length?assigned.map(p=>`<div class="glass card" style="border-left:4px solid ${p.riskLevel==='CRITICAL'?'var(--cr)':'var(--wr)'}"><span class="pill ${rk(p.riskLevel)}">${p.riskLevel}</span>
+  <h3 style="margin:12px 0 4px">${p.name}</h3><div style="color:var(--mut);font-size:13px">${p.condition}</div>
+  <div class="mono" style="margin-top:12px;font-size:13px"><b>${p.or}</b> · ${p.duration}</div></div>`).join(''):`<div class="glass card" style="color:var(--mut)">No patients currently require urgent OR prioritization.</div>`}</div>
+  <div class="glass card" style="margin-top:16px;color:var(--mut);font-size:13px">Queue recalculates live from real patient risk — MEDIUM/STABLE patients are scheduled electively and not shown here.</div>
+
+  <div class="glass card" style="margin-top:24px"><h3>⧗ Time-Based Scheduling <span class="pill p-inf" style="margin-left:8px;vertical-align:middle">Add-on</span></h3>
+  <p style="color:var(--mut);font-size:13px;margin:8px 0 16px">Book a specific future OR slot for a non-urgent or elective procedure — independent of the live risk queue above.</p>
+  <div class="grid g4">
+    <select id="ors_patient">${patientOptions}</select>
+    <select id="ors_room">${roomOptions}</select>
+    <input id="ors_date" type="date">
+    <input id="ors_time" type="time">
+  </div>
+  <div class="grid g2" style="margin-top:12px"><input id="ors_proc" placeholder="Procedure (e.g. Appendectomy)"><input id="ors_dur" placeholder="Duration (e.g. 90 min)"></div>
+  <button class="btn" style="margin-top:14px" onclick="bookORSlot()">Schedule OR time</button></div>
+
+  <div class="glass card tw" style="margin-top:16px"><h3 style="margin-bottom:12px">Upcoming scheduled procedures</h3>
+  <table><tr><th>Patient</th><th>OR</th><th>Date</th><th>Time</th><th>Procedure</th><th>Duration</th><th>Status</th><th></th></tr>
+  ${upcoming.length?upcoming.map(s=>`<tr><td><b>${s.patientName}</b></td><td class="mono">${s.orRoom}</td><td class="mono">${s.date}</td><td class="mono">${s.time}</td><td>${s.procedure}</td><td class="mono">${s.duration}</td><td><span class="pill p-inf">${s.status}</span></td><td><button class="ghost" style="font-size:12px;padding:6px 12px" onclick="cancelORSlot('${s.id}')">Cancel</button></td></tr>`).join(''):`<tr><td colspan="8" style="color:var(--mut)">No time-based OR slots scheduled yet.</td></tr>`}</table></div>`;
+},
+
+rec: async()=>{
+  const report=await api('/simulation/report');
+  const recs=[];
+  const s=report.hospitalState;
+  if(s.icuPressure>80) recs.push(['HIGH','ICU pressure elevated',`ICU pressure is at ${s.icuPressure}%.`,'Free up step-down beds and review discharge-ready patients.']);
+  if(s.staffPressure>75) recs.push(['HIGH','Staff load elevated',`Staff pressure is at ${s.staffPressure}%.`,'Reallocate available nurses/doctors to high-load wards.']);
+  if(s.orPressure>75) recs.push(['MEDIUM','OR pressure elevated',`OR pressure is at ${s.orPressure}%.`,'Reschedule non-urgent elective procedures.']);
+  if(report.stockoutRiskItems.length) recs.push(['HIGH','Inventory stockout risk',`${report.stockoutRiskItems.length} item(s) below safe cover: ${report.stockoutRiskItems.join(', ')}.`,'Raise purchase orders for flagged items immediately.']);
+  if(!recs.length) recs.push(['LOW','All systems nominal','No pressure thresholds are currently breached.','Continue routine monitoring.']);
+  return H('Optimization Recommendations','Generated live from current hospital state — not scripted')+
+  `<div class="grid g2">${recs.map(r=>`<div class="glass card"><span class="pill ${rk(r[0])}">${r[0]} PRIORITY</span><h3 style="margin:12px 0">${r[1]}</h3><p style="color:var(--mut);line-height:1.7">${r[2]}</p><p style="margin-top:10px;font-weight:600;color:var(--ok)">${r[3]}</p></div>`).join('')}</div>`;
+},
+
+aud: async()=>{
+  const log=await api('/audit');
+  return H('System Activity','Every automated and manual action, in order')+
+  `<div class="glass card">${log.length?log.map(a=>`<div style="display:flex;gap:18px;padding:12px 0;border-bottom:1px solid var(--line)"><b class="mono" style="color:var(--ac);white-space:nowrap">${a.time}</b><span>${a.message}</span></div>`).join(''):'<div style="color:var(--mut)">No activity yet.</div>'}</div>`;
+},
+
+dsh: async()=>{
+  if(ME.user.role==='doctor'){
+    const me=await api('/doctors/me');
+    return H('Clinical Workspace','Dr. '+me.name+' · '+me.specialty)+
+    `<div class="grid g4">${KPI('Assigned Patients',me.patients.length)}${KPI('Specialty',me.specialty)}${KPI('Critical',me.patients.filter(p=>p.riskLevel==='CRITICAL').length)}${KPI('High Risk',me.patients.filter(p=>p.riskLevel==='HIGH').length)}</div>
+    <div class="glass card" style="margin-top:16px"><h3>Your patients</h3><div class="tw" style="margin-top:12px"><table><tr><th>Patient</th><th>Bed</th><th>HR</th><th>SpO₂</th><th>Risk</th><th></th></tr>
+    ${me.patients.length?me.patients.map(p=>`<tr><td><b>${p.name}</b></td><td class="mono">${p.bedId||'—'}</td><td class="mono">${p.vitals.hr}</td><td class="mono">${p.vitals.spo2}%</td><td><span class="pill ${rk(p.riskLevel)}">${p.riskLevel}</span></td><td><button class="ghost" style="font-size:12px;padding:6px 12px" onclick="doDischarge('${p.id}')">Discharge</button></td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--mut)">No patients assigned yet.</td></tr>`}</table></div></div>`;
+  } else {
+    const patients=await api('/patients');
+    return H('Nurse Station','Patients under active monitoring')+
+    `<div class="glass card tw"><table><tr><th>Patient</th><th>Bed</th><th>HR</th><th>SpO₂</th><th>Risk</th><th></th></tr>
+    ${patients.length?patients.map(p=>`<tr><td><b>${p.name}</b></td><td class="mono">${p.bedId||'—'}</td><td class="mono">${p.vitals.hr}</td><td class="mono">${p.vitals.spo2}%</td><td><span class="pill ${rk(p.riskLevel)}">${p.riskLevel}</span></td><td><button class="ghost" style="font-size:12px;padding:6px 12px" onclick="openVitals('${p.id}')">Update vitals</button></td></tr>`).join(''):`<tr><td colspan="6" style="color:var(--mut)">No patients yet.</td></tr>`}</table></div><div id="vitalsPanel"></div>`;
+  }
+},
+dpat: async()=>VIEWS.pat(),
+
+dreq: async()=>{
+  const reqs=await api('/requests');
+  return H('Chat Requests','Patients asking to talk with you directly')+
+  `<div class="grid g2">${reqs.length?reqs.map(r=>`<div class="glass card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${r.patientName}</b><span class="pill ${r.status==='PENDING'?'p-wr':r.status==='ACCEPTED'?'p-ok':'p-cr'}">${r.status}</span></div>
+  <p style="margin:14px 0;line-height:1.7;padding:14px;background:rgba(255,255,255,.55);border-radius:16px;border:1px solid var(--line)">"${r.reason}"</p>
+  ${r.status==='PENDING'?`<div style="display:flex;gap:10px"><button class="btn" onclick="respondReq('${r.id}','ACCEPTED')">Accept</button><button class="ghost" onclick="respondReq('${r.id}','REJECTED')">Reject</button></div>`:`<div style="color:var(--mut);font-size:13px">Already ${r.status.toLowerCase()}</div>`}</div>`).join(''):`<div class="glass card" style="color:var(--mut)">No requests yet.</div>`}</div>`;
+},
+
+dapt: async()=>{
+  const appts=await api('/appointments');
+  return H('Appointment Requests','Patients requesting a visit with you')+
+  `<div class="grid g2">${appts.length?appts.map(a=>`<div class="glass card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${a.patientName}</b><span class="pill ${a.status==='CONFIRMED'?'p-ok':a.status==='CANCELLED'?'p-cr':a.status==='COMPLETED'?'p-inf':'p-wr'}">${a.status}</span></div>
+  <div style="color:var(--mut);font-size:13px;margin:8px 0">${a.date} at ${a.time}</div>
+  <p style="margin:10px 0;line-height:1.6;padding:12px;background:rgba(255,255,255,.55);border-radius:14px;border:1px solid var(--line)">"${a.reason}"</p>
+  ${a.status==='REQUESTED'?`<div style="display:flex;gap:10px"><button class="btn" onclick="respondAppt('${a.id}','CONFIRMED')">Confirm</button><button class="ghost" onclick="respondAppt('${a.id}','CANCELLED')">Decline</button></div>`:a.status==='CONFIRMED'?`<button class="ghost" onclick="respondAppt('${a.id}','COMPLETED')">Mark completed</button>`:`<div style="color:var(--mut);font-size:13px">Already ${a.status.toLowerCase()}</div>`}</div>`).join(''):`<div class="glass card" style="color:var(--mut)">No appointment requests yet.</div>`}</div>`;
+},
+
+appt: async()=>{
+  const [doctors, appts]=await Promise.all([api('/doctors/directory'), api('/appointments')]);
+  const doctorOptions=doctors.length?doctors.map(d=>`<option value="${d.id}">${d.name} — ${d.specialty}</option>`).join(''):'<option value="">No doctors available</option>';
+  return H('Book an Appointment','Request a visit with any doctor on the roster — not limited to your assigned doctor')+
+  `<div class="glass card" style="margin-bottom:16px"><h3>New appointment request</h3>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="field"><label>Doctor</label><select id="ap_doctor">${doctorOptions}</select></div>
+    <div class="field"><label>Reason for visit</label><input id="ap_reason" placeholder="e.g. Follow-up consultation"></div>
+  </div>
+  <div class="grid g2">
+    <div class="field"><label>Date</label><input id="ap_date" type="date"></div>
+    <div class="field"><label>Time</label><input id="ap_time" type="time"></div>
+  </div>
+  <button class="btn" onclick="bookAppointment()">Request appointment</button></div>
+
+  <div class="glass card tw"><h3 style="margin-bottom:12px">Your appointments</h3>
+  <table><tr><th>Doctor</th><th>Specialty</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th></th></tr>
+  ${appts.length?appts.map(a=>`<tr><td><b>${a.doctorName}</b></td><td>${a.specialty||'—'}</td><td class="mono">${a.date}</td><td class="mono">${a.time}</td><td>${a.reason}</td><td><span class="pill ${a.status==='CONFIRMED'?'p-ok':a.status==='CANCELLED'?'p-cr':a.status==='COMPLETED'?'p-inf':'p-wr'}">${a.status}</span></td><td>${a.status==='REQUESTED'||a.status==='CONFIRMED'?`<button class="ghost" style="font-size:12px;padding:6px 12px" onclick="cancelAppointment('${a.id}')">Cancel</button>`:''}</td></tr>`).join(''):`<tr><td colspan="7" style="color:var(--mut)">No appointments booked yet.</td></tr>`}</table></div>`;
+},
+
+pdash: async()=>{
+  const p=await api('/patients/me');
+  return H('Good day, '+p.name.split(' ')[0],'Your personal care portal')+
+  `<div class="grid g4">${KPI('Care Status',p.riskLevel)}${KPI('Assigned Doctor',p.doctor?p.doctor.name:'Pending')}${KPI('Bed',p.bedId||'—')}${KPI('Heart Rate',p.vitals.hr+' bpm')}</div>
+  <div class="grid g2" style="margin-top:16px"><div class="glass card"><h3>Your vitals</h3><div style="margin-top:12px">${PB('SpO₂',p.vitals.spo2)}${PB('Heart Rate (scaled)',Math.min(99,p.vitals.hr))}${PB('Respiratory Rate (scaled)',Math.min(99,p.vitals.rr*3))}</div><div style="color:var(--mut);font-size:12px;margin-top:8px">Blood Pressure: ${p.vitals.bp}</div></div>
+  <div class="glass card"><h3>Your care team</h3><p style="margin:12px 0;color:var(--mut)">${p.doctor?`Assigned automatically to <b style="color:var(--ink)">${p.doctor.name}</b> (${p.doctor.specialty}) based on your condition and current caseloads.`:'A doctor will be assigned automatically once one is available on the roster.'}</p>
+  <button class="btn" onclick="go('chat')">✦ Ask the care assistant</button> <button class="ghost" onclick="requestDoctorChat()">Request doctor chat</button> <button class="ghost" onclick="go('appt')">🗓 Book appointment</button></div></div>`;
+},
+
+chat: async()=>{
+  const html=H('VitalOps Care Assistant','Personalized to your condition and vitals · powered by real AI when configured')+
+  `<div class="glass"><div class="chat" id="chatbox"></div>
+  <div style="display:flex;gap:10px;padding:16px;border-top:1px solid var(--line)"><input id="cin" placeholder="Describe how you're feeling…" onkeydown="if(event.key=='Enter')sendChat()"><button class="btn" onclick="sendChat()">Send</button></div></div>
+  <div class="glass card" style="margin-top:16px;font-size:12px;color:var(--mut)">⚠ Decision support only — not a medical diagnosis. For emergencies, contact hospital staff immediately.</div>`;
+  setTimeout(async()=>{
+    const p=await api('/patients/me');
+    const box=$('#chatbox');
+    if(box && p.chatHistory && p.chatHistory.length){
+      box.innerHTML=p.chatHistory.map(m=>`<div class="msg ${m.role==='user'?'me':'bot'}">${m.content}</div>`).join('');
+      box.scrollTop=box.scrollHeight;
+    } else if(box){
+      box.innerHTML=`<div class="msg bot">Hello ${p.name.split(' ')[0]} — I'm your VitalOps care assistant. Tell me how you're feeling and I'll help, and can reach your doctor if needed.</div>`;
+    }
+  },50);
+  return html;
+},
+
+ptl: async()=>{
+  const p=await api('/patients/me');
+  return H('Your Care Timeline','Every event in your admission, automatically logged')+
+  `<div class="glass card"><div class="tl">${p.timeline.map(t=>`<div><b class="mono" style="color:var(--ac);font-size:12px">${t.time}</b><div>${t.event}</div></div>`).join('')}</div></div>`;
+}
+};
+
+function toggleAddPatient(){
+  const el=$('#addPatientPanel');
+  if(el.innerHTML){el.innerHTML='';return}
+  el.innerHTML=`<div class="glass card fade" style="margin-bottom:14px"><h3>Add new patient</h3>
+  <div class="grid g4" style="margin-top:12px"><input id="np_name" placeholder="Full name"><input id="np_age" type="number" placeholder="Age"><select id="np_gender"><option>Female</option><option>Male</option><option>Other</option></select><input id="np_condition" placeholder="Condition / specialty"></div>
+  <label style="display:flex;gap:8px;align-items:center;margin-top:12px;font-size:13px;color:var(--mut)"><input type="checkbox" id="np_isolation" style="width:auto">Requires isolation precautions (infection control)</label>
+  <button class="btn" style="margin-top:14px" onclick="submitAddPatient()">Admit patient</button></div>`;
+}
+async function submitAddPatient(){
+  const name=$('#np_name').value.trim();
+  if(!name) return toast('Name is required');
+  await api('/patients',{method:'POST',body:JSON.stringify({name,age:$('#np_age').value,gender:$('#np_gender').value,condition:$('#np_condition').value,isolationPrecaution:$('#np_isolation').checked})});
+  toast('Patient admitted — doctor & bed auto-assigned');
+  $('#addPatientPanel').innerHTML='';
+  render();
+}
+async function doDischarge(id){
+  if(!confirm('Discharge this patient? Their room will automatically enter sanitation.')) return;
+  await api('/patients/'+id+'/discharge',{method:'PATCH'});
+  toast('Patient discharged — sanitation cycle started automatically');
+  render();
+}
+function openVitals(id){
+  $('#vitalsPanel').innerHTML=`<div class="glass card fade" style="margin-top:16px"><h3>Update vitals — ${id}</h3>
+  <div class="grid g4" style="margin-top:12px"><input id="v_hr" placeholder="HR" type="number"><input id="v_spo2" placeholder="SpO2" type="number"><input id="v_bp" placeholder="BP e.g 118/78"><input id="v_rr" placeholder="RR" type="number"></div>
+  <button class="btn" style="margin-top:14px" onclick="saveVitals('${id}')">Save & recompute risk</button></div>`;
+  $('#vitalsPanel').scrollIntoView({behavior:'smooth'});
+}
+async function saveVitals(id){
+  const body={};
+  const hr=$('#v_hr').value,spo2=$('#v_spo2').value,bp=$('#v_bp').value,rr=$('#v_rr').value;
+  if(hr)body.hr=Number(hr);if(spo2)body.spo2=Number(spo2);if(bp)body.bp=bp;if(rr)body.rr=Number(rr);
+  await api('/patients/'+id+'/vitals',{method:'PATCH',body:JSON.stringify(body)});
+  toast('Vitals updated — risk recomputed automatically');
+  render();
+}
+async function advanceRoom(id){
+  try{await api('/rooms/'+id+'/advance',{method:'PATCH'});toast('Room advanced');render()}
+  catch(e){toast(e.message)}
+}
+async function claimRoom(id){
+  try{await api('/rooms/'+id+'/claim',{method:'POST'});toast('Room claimed — checklist ready');render()}
+  catch(e){toast(e.message)}
+}
+async function toggleChecklist(roomId,taskId,done){
+  try{await api('/rooms/'+roomId+'/checklist/'+taskId,{method:'PATCH',body:JSON.stringify({done})});render()}
+  catch(e){toast(e.message)}
+}
+async function flagDeepClean(id){
+  try{await api('/rooms/'+id+'/flag-deep-clean',{method:'PATCH'});toast('Room flagged for a deep clean');render()}
+  catch(e){toast(e.message)}
+}
+async function toggleIsolation(id,current){
+  try{await api('/patients/'+id+'/isolation',{method:'PATCH',body:JSON.stringify({isolationPrecaution:!current})});toast(!current?'Isolation precautions flagged':'Isolation precautions cleared');render()}
+  catch(e){toast(e.message)}
+}
+async function addCareTask(){
+  const patientId=$('#ct_patient').value, task=$('#ct_task').value.trim(), priority=$('#ct_priority').value;
+  if(!patientId||!task) return toast('Patient and task are required');
+  try{await api('/tasks',{method:'POST',body:JSON.stringify({patientId,task,priority})});toast('Task added');render()}
+  catch(e){toast(e.message)}
+}
+async function completeCareTask(id){
+  try{await api('/tasks/'+id+'/complete',{method:'PATCH'});render()}
+  catch(e){toast(e.message)}
+}
+async function addHandoffNote(){
+  const ward=$('#hn_ward').value.trim(), note=$('#hn_note').value.trim();
+  if(!note) return toast('Note text is required');
+  try{await api('/tasks/handoff/notes',{method:'POST',body:JSON.stringify({ward,note})});toast('Note added');render()}
+  catch(e){toast(e.message)}
+}
+async function reportMaintenance(){
+  const ward=$('#mt_ward').value.trim(), roomId=$('#mt_room').value.trim(), priority=$('#mt_priority').value, issue=$('#mt_issue').value.trim();
+  if(!issue) return toast('Issue description is required');
+  try{await api('/maintenance',{method:'POST',body:JSON.stringify({ward,roomId,priority,issue})});toast('Issue reported');render()}
+  catch(e){toast(e.message)}
+}
+async function resolveMaintenance(id,status){
+  try{await api('/maintenance/'+id,{method:'PATCH',body:JSON.stringify({status})});toast('Status updated: '+status);render()}
+  catch(e){toast(e.message)}
+}
+
+function toggleAddInventory(){
+  const el=$('#addInvPanel');
+  if(el.innerHTML){el.innerHTML='';return}
+  el.innerHTML=`<div class="glass card fade" style="margin-bottom:14px"><h3>Add inventory item</h3>
+  <div class="grid g4" style="margin-top:12px"><input id="iv_name" placeholder="Item name"><input id="iv_stock" type="number" placeholder="Stock"><input id="iv_daily" type="number" placeholder="Daily use"><input id="iv_lead" type="number" placeholder="Lead time (days)"></div>
+  <div class="field" style="margin-top:12px;max-width:220px"><label>Criticality</label><select id="iv_crit"><option>LOW</option><option>MEDIUM</option><option selected>HIGH</option></select></div>
+  <button class="btn" style="margin-top:8px" onclick="submitAddInventory()">Add item</button></div>`;
+}
+async function submitAddInventory(){
+  const name=$('#iv_name').value.trim();
+  if(!name) return toast('Item name is required');
+  await api('/inventory',{method:'POST',body:JSON.stringify({name,stock:$('#iv_stock').value,dailyUsage:$('#iv_daily').value,leadTimeDays:$('#iv_lead').value,criticality:$('#iv_crit').value})});
+  toast('Inventory item added');$('#addInvPanel').innerHTML='';render();
+}
+async function removeInventoryItem(id,name){
+  if(!confirm('Remove "'+name+'" from inventory?')) return;
+  await api('/inventory/'+id,{method:'DELETE'});
+  toast('Inventory item removed');render();
+}
+
+async function addBeds(){
+  const ward=$('#bed_ward').value.trim(), count=$('#bed_count').value;
+  if(!ward) return toast('Ward name is required');
+  await api('/beds',{method:'POST',body:JSON.stringify({ward,count})});
+  toast('Beds added');render();
+}
+async function removeBed(id){
+  if(!confirm('Remove bed '+id+'?')) return;
+  try{await api('/beds/'+id,{method:'DELETE'});toast('Bed removed');render()}
+  catch(e){toast(e.message)}
+}
+
+async function bookAppointment(){
+  const doctorId=$('#ap_doctor').value, reason=$('#ap_reason').value.trim(), date=$('#ap_date').value, time=$('#ap_time').value;
+  if(!doctorId||!date||!time) return toast('Doctor, date and time are required');
+  try{await api('/appointments',{method:'POST',body:JSON.stringify({doctorId,date,time,reason})});toast('Appointment requested');render()}
+  catch(e){toast(e.message)}
+}
+async function cancelAppointment(id){
+  await api('/appointments/'+id,{method:'PATCH',body:JSON.stringify({status:'CANCELLED'})});
+  toast('Appointment cancelled');render();
+}
+async function respondAppt(id,status){
+  await api('/appointments/'+id,{method:'PATCH',body:JSON.stringify({status})});
+  toast('Appointment '+status.toLowerCase());render();
+}
+
+async function bookORSlot(){
+  const patientId=$('#ors_patient').value, orRoom=$('#ors_room').value, date=$('#ors_date').value, time=$('#ors_time').value, procedure=$('#ors_proc').value.trim(), duration=$('#ors_dur').value.trim();
+  if(!patientId||!date||!time) return toast('Patient, date and time are required');
+  try{await api('/or-schedule',{method:'POST',body:JSON.stringify({patientId,orRoom,date,time,procedure,duration})});toast('OR time scheduled');render()}
+  catch(e){toast(e.message)}
+}
+async function cancelORSlot(id){
+  await api('/or-schedule/'+id,{method:'DELETE'});
+  toast('OR slot removed');render();
+}
+async function runSim(name){
+  const r=await api('/simulation',{method:'POST',body:JSON.stringify({scenario:name})});
+  const f=(a,b,c)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)"><span>${a}</span><b class="mono">${b}%</b></div>`;
+  $('#simout').innerHTML=`<div class="glass card fade"><span class="pill p-cr">EVENT · ${name}</span>
+  <div class="grid g3" style="margin-top:16px"><div><div class="mono" style="font-size:11px;color:var(--mut)">BEFORE</div>${Object.entries(r.before).map(([k,v])=>f(k,v)).join('')}</div>
+  <div style="display:grid;place-items:center;font-size:34px;color:var(--ac)">→</div>
+  <div><div class="mono" style="font-size:11px;color:var(--cr)">AFTER</div>${Object.entries(r.after).map(([k,v])=>f(k,v)).join('')}</div></div></div>`;
+  toast('Simulation applied to live hospital state');
+}
+async function requestDoctorChat(){
+  try{await api('/requests',{method:'POST',body:JSON.stringify({reason:"Would like to discuss today's care plan"})});toast('Request sent to your doctor')}
+  catch(e){toast(e.message)}
+}
+let CHATLOADED=false;
+async function sendChat(){
+  const i=$('#cin');const t=i.value.trim();if(!t)return;i.value='';
+  const box=$('#chatbox');
+  box.insertAdjacentHTML('beforeend',`<div class="msg me">${t}</div>`);box.scrollTop=box.scrollHeight;
+  box.insertAdjacentHTML('beforeend',`<div class="msg bot" id="ty"><div class="typing"><i></i><i></i><i></i></div></div>`);box.scrollTop=box.scrollHeight;
+  try{
+    const r=await api('/chat',{method:'POST',body:JSON.stringify({message:t})});
+    document.querySelector('#ty')?.remove();
+    box.insertAdjacentHTML('beforeend',`<div class="msg bot">${r.reply}${!r.usedAI?`<div style="margin-top:8px;font-size:10px;opacity:.6">offline assistant mode</div>`:''}</div>`);
+    box.scrollTop=box.scrollHeight;
+  }catch(e){document.querySelector('#ty')?.remove();box.insertAdjacentHTML('beforeend',`<div class="msg bot">Sorry, something went wrong: ${e.message}</div>`)}
+}
+
+// boot
+renderAuth();
+if(TOKEN&&ME) enterApp();
+</script></body></html>
